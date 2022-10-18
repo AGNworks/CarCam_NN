@@ -1,0 +1,25 @@
+body{
+    background-color: lightgray;
+}
+
+#container {
+    margin:  auto;
+    width: 50%;
+    height: 50%;
+}
+
+#videoElement {
+    width: 100%;
+    height: 100%;
+}
+
+#control_buttons{
+    margin: auto;
+    width: 100%;
+    text-align: center;
+}
+
+button{
+    width: 40px;
+    height: 40px;
+}

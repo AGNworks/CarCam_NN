@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+
+    <title>CarCam</title>
+
+    <link rel="stylesheet" href="{{url_for('static',filename='css/mainpage.css')}}" >
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico')}}">
+
+     <!--<link rel="stylesheet" href="styles.css">-->
+
+</head>
+ 
+<body>
+    <div id="container">
+        <div id="pictures">
+            <table>
+                <td>
+                    <img src="{{ url_for('video_feed') }}" style="float:left; width:100%; max-width: 700px; max-height:600px; border-radius:10px"></img>
+                </td>
+                <td>
+                    <img src="{{ url_for('seq_feed') }}" style="float:left; width:100%; max-width: 700px; max-height:600px; border-radius:10px"></img>
+                </td>
+            
+            </table>
+        </div>
+        <div id="control_buttons">
+            <table>
+                <td>
+                    <table>
+                        <tr>
+                          <td> </td>
+                          <td><button onclick="cmd_ajax(this)">F</button></td>
+                          <td> </td>
+                        </tr>
+                        <tr>
+                          <td><button onclick="cmd_ajax(this)">L</button></td>
+                          <td><button onclick="cmd_ajax(this)">B</button></td>
+                          <td><button onclick="cmd_ajax(this)">R</button></td>
+                        </tr>
+                        <tr>
+                          <td><button onclick="cmd_ajax(this)">S</button></td>
+                          <td> </td>
+                          <td><button onclick="cmd_ajax(this)">C</button></td>
+                        </tr>
+                      </table> 
+                </td>
+                <td>
+                    <img src="{{ url_for('status') }}" style="float:left; width:100%; max-width: 700px; max-height:600px; border-radius:10px"></img>
+                </td>
+            </table>
+        </div>
+    </div>
+</body>
+
+<script type=text/javascript> 
+    function cmd_ajax(id){
+        x = id.innerHTML;
+        $.ajax({
+            type: "POST",
+            url: "/process",
+            data: JSON.stringify(x),
+            contentType: "application/json",
+            dataType: 'json'
+        });
+    };
+
+</script>
+
+<script src="/static/js/jquery-3.6.0.js"></script>
+
+</html>
