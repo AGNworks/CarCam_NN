@@ -17,8 +17,12 @@
 ![seg_pics](https://github.com/AGNworks/CarCam_NN/blob/main/pictures/3.png)
 
 ##The architecture of the NN model
-**I started with a simple linear model Conv2D layers and Normalization, but this model didn't gave me good results with pictures what it never seen, so I moved on and experimented with U-Net models. Now I have simple U-Net model with 3 downsampling Block - Bottleneck - 3 upsampling Block. Here you can see how it works:** 
+**I started with a simple linear model Conv2D layers and Normalization, but this model didn't give me good results with pictures, what it never seen, so I moved on and experimented with U-Net models. Now I have simple U-Net model with 3 downsampling Block - Bottleneck - 3 upsampling Block. Here you can see how it works:** 
 
 ![res_pics](https://github.com/AGNworks/CarCam_NN/blob/main/pictures/4.png)
+
+**At this moment I am working on making this system work faster on Raspberry Pi 4, and optimise my code. As I will make progress in it I will add the code to this repository.**
+
+
 
 
