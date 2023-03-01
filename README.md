@@ -10,4 +10,10 @@
 ![Old version](https://github.com/AGNworks/CarCam_NN/blob/main/pictures/2.png)
 
 ## Dataset collecting
-** For first I wrote a program which can control the robot step by step, and after every step (which is choosen from [forward, backward, left, right]) it is saving a picture. After collecting in this way enough pics, I prepared them for further work. The code for the collection you can find in [this](https://github.com/AGNworks/CarCam) repository. **
+**For first I wrote a program which can control the robot step by step, and after every step (which is choosen from [forward, backward, left, right]) it is saving a picture. After collecting in this way enough pics, I prepared them for further work. The code, for the process of collection, you can find in [this](https://github.com/AGNworks/CarCam) repository.**
+
+**I generated the train segmented pictures (for the teaching process of the neural network) with the help of GIMP. To turn the rest of the picture to black I wrote a simple code to do this for me (everything what is not white should be black), here is the [code](https://github.com/AGNworks/Image-segmentation-with-GIMP/blob/main/y_generator.py) for that. And the end of this process I cheched, if all went well (it should be just clean white and clean black pixels on the picture) the code for the test is [here](https://github.com/AGNworks/Image-segmentation-with-GIMP/blob/main/check_y_image.py)**
+
+![seg_pics](https://github.com/AGNworks/CarCam_NN/blob/main/pictures/3.png)
+
+
