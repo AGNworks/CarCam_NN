@@ -25,7 +25,7 @@
 ![res_pics](https://github.com/AGNworks/CarCam_NN/blob/main/pictures/4.png)
 
 ## Set up -- Raspberry Pi
-Before using the code we need to set up the system to run the python code after boot. For this 
+Before using the code we need to set up the system to run the python code after boot. For this read the following [txt file](https://github.com/AGNworks/CarCam_NN/blob/main/bootraspi.txt) .
 
 
 
