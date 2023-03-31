@@ -8,16 +8,17 @@ backg = (0,0,0)
 class_labels = (way, backg)
 
 #loading model
-my_model = load_model('model_unet_light.h5')
+my_model = load_model('/home/agn/CarCam_NN/model_unet_light_new_better.h5', compile = False)
 print("Ready to make segmanted pictures")
 
-
+height = 60
+width = 80
 
 def labels_to_rgb(image_list):
     result = []
 
     for y in image_list:
-        temp = np.zeros((240, 320, 3), dtype='uint8')
+        temp = np.zeros((height, width, 3), dtype='uint8')
 
         for i, cl in enumerate(class_labels):
             temp[np.where(np.all(y==i, axis=-1))] = class_labels[i]
@@ -28,14 +29,11 @@ def labels_to_rgb(image_list):
 
 
 def segmentpics(img):
-    x = image.img_to_array(img)
-    x = np.array(x)
-    #print(x.shape)
-    
-    x = np.expand_dims(x, axis=0)
-    #print(x.shape)
+    #x = image.img_to_array(img)
+    #x = np.array(img)
 
-    predict = np.argmax(my_model.predict(x), axis=-1)     #getting results as array
+    x = np.expand_dims(img, axis=0)
+    predict = np.argmax(my_model.predict(x, verbose = 0), axis=-1)     #getting results as array
     return labels_to_rgb(predict[..., None])      #returning the result as array of rgb images
 
 
