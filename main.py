@@ -15,14 +15,14 @@ mode = GPIO.getmode()
 GPIO.setmode(GPIO.BCM)
 
 GPIO.setup(21, GPIO.IN, pull_up_down = GPIO.PUD_UP)
-def shutdownrpi(channel):
+def shutdownrpi(channel):  #function for turning off raspberry pi safely with the help of a button on GPIO pin 21
     print("Shutting down")
     time.sleep(5)
     os.system("sudo shutdown -h now")
     
 GPIO.add_event_detect(21, GPIO.FALLING, callback=shutdownrpi, bouncetime=2000)
 
-speed = 50 #Starting PWM % value for wheels
+speed = 50 #Starting PWM % value for wheels, this determinates the speed of the motors 
 sleepturn = 0.3
 sleeprun = 0.5
 
@@ -31,12 +31,14 @@ imgname = "norec.jpg"
 rec_img = False
 
 NN_on = False
-img_w = 240
-img_h = 320
+img_w = 60
+img_h = 80
 
 
 overlay = cv2.imread('static/overlay.png')
+print(type(overlay))
 
+#Controlling pins for motors
 Apin1 = 15
 Apin2 = 14
 Bpin1 = 26
@@ -45,6 +47,7 @@ Aen = 18   #PWM pin
 Ben = 13   #PWM pin
 stateLED = 25
 
+#Set up the mode of the GPIO pins 
 GPIO.setup(Apin1, GPIO.OUT)
 GPIO.setup(Apin2, GPIO.OUT)
 GPIO.setup(Bpin1, GPIO.OUT)
@@ -54,6 +57,7 @@ GPIO.setup(Ben, GPIO.OUT)
 
 GPIO.setup(stateLED, GPIO.OUT)
 
+#flash ones with the LED pins
 GPIO.output(stateLED, GPIO.HIGH)
 time.sleep(0.5)
 GPIO.output(stateLED, GPIO.LOW)
@@ -93,8 +97,7 @@ def turnleft():
     GPIO.output(Apin1, GPIO.HIGH)
     GPIO.output(Apin2, GPIO.LOW)
     print("ML")
-    time.sleep(sleepturn)
-    stop()
+
     
 def turnright():
     GPIO.output(Apin1, GPIO.LOW)
@@ -102,46 +105,43 @@ def turnright():
     GPIO.output(Bpin1, GPIO.HIGH)
     GPIO.output(Bpin2, GPIO.LOW)
     print("MR")
-    time.sleep(sleepturn)
-    stop()
 
-def create_imgs():
+
+def turn_NN_on():
     global NN_on
     if NN_on == False:
         try:
-            #t = threading.Timer(5.0, create_frame).start()
             NN_on = True
-            print("ON")
+            print("NN - ON")
             GPIO.output(stateLED, GPIO.HIGH)
         except:
-            print("can't start recording")
+            print("can't start NN")
     elif NN_on == True:
         try:
-            #t.cancel()
             NN_on = False
-            print("OFF")
+            print("NN - OFF")
             GPIO.output(stateLED, GPIO.LOW)
         except:
-            print("can't stop recording")
-    
+            print("can't stop NN")
 
-def create_frame():  #function to save frames when button is pressed
-    if rec_img == True:
-        time.sleep(sleeprun)  #stopping the movement of the car before creating a picture
-        stop()
-        time.sleep(1) #needed to make less not clear image
-        with open ("imgnumb.txt", "r") as numbfile:   #reading from file the current number of the frame
-            imgnumb = int(numbfile.read())
-        print(imgnumb)
-        
-        cv2.imwrite('/home/agn/Pictures/createdimgs_new/{}.png'.format(imgnumb), simg)
-        imgnumb += 1
-        
-        with open ("imgnumb.txt", "w") as numbfile: #writing to the file the current number of the frame
-            numbfile.write(str(imgnumb))
-    
+check_xy = [45, 45]
+def control_NN(img): #function to control the robot accoding to the predicted image
+    white = [255,255,255]
+    if NN_on == True:
+        if img[check_xy[0]][check_xy[1]][0] <= 5 and img[check_xy[0]][check_xy[1]][1] <= 5 and img[check_xy[0]][check_xy[1]][2] <= 5 :
+            ind_left = np.where(np.all(img[check_xy[0]][0 : check_xy[1]] == white, axis = -1))[0]
+            ind_right = np.where(np.all(img[check_xy[0]][check_xy[1] : ] == white, axis = -1))[0]
+            
+            if len(ind_left) != 0:
+                turnleft()
+            else:
+                turnright()
+                
+        else:
+            forward()
 
-def check_wifi(): #function to chechk wifi connection
+
+def check_wifi(): #function to check wifi connection
     wifi_ip = check_output(['hostname', '-I'])
     wifi_str = str(wifi_ip.decode())
     if len(wifi_ip) > 4:
@@ -156,13 +156,15 @@ ip_adr = check_wifi()
 print(ip_adr)
 print(type(ip_adr))
 
-img_size = (240,320)
+
+
+img_size = (60,80)
 if ip_adr is not None:
     app = Flask(__name__)
     
     simg = np.empty(shape = (img_size[0],img_size[1],3))
     
-    def gen_frames():
+    def gen_frames(): #this generates the video content for visualization
         camera = cv2.VideoCapture(0)
         while True:
             success, frame = camera.read()  # read the camera frame
@@ -172,22 +174,18 @@ if ip_adr is not None:
                 #w = int(frame.shape[1]/2)
                 #h = int(frame.shape[0]/2)
                 global simg
-                simg = cv2.resize(frame, (img_size[1],img_size[0]))
-                overlayed = cv2.addWeighted(simg, 1, overlay, 1,0)
-                ret, buffer = cv2.imencode('.jpg', overlayed)
+                simg = cv2.resize(frame, (img_size[1],img_size[0])) #the resized capture image from webcam
+                imgseg = cv2.cvtColor(simg, cv2.COLOR_BGR2RGB) #change channel order pefore giving it to NN
+                predict_segments = segmentpics(imgseg) #get prediction from model
+                predicted = predict_segments[0]
+                control_NN(predicted) #controling function
+                
+                overlayed = cv2.addWeighted(simg, 1, predicted, 1,0) #combine the original and the predicted image
+                ret, buffer = cv2.imencode('.jpg', overlayed) 
                 frame = buffer.tobytes()
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
     
-    def gen_seq(): 
-        while True:
-            cv2.imwrite('temp/0.png', simg)
-            imgseg = image.load_img('temp/0.png', target_size=(img_w, img_h))
-            predict_segments = segmentpics(imgseg)
-            ret, buffer = cv2.imencode('.png', predict_segments[0])
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
             
 
     @app.route("/")
@@ -199,10 +197,6 @@ if ip_adr is not None:
     def video_feed():
         return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
     
-    @app.route('/seq_feed')
-    def seq_feed():
-        return Response(gen_seq(), mimetype='multipart/x-mixed-replace; boundary=frame')
-    
     @app.route('/status')
     def status():
         global imgname
@@ -212,29 +206,13 @@ if ip_adr is not None:
     def background_process_test():
         if request.method == "POST":
             data = request.get_json()
-            print (type(data))
-            if data == "F" : 
-                print("the machine moves forward")
-                forward()
-                create_frame()
-            elif data == "B" : 
-                print("the machine moves back")
-                backward()
-                create_frame()
-            elif data == "L" : 
-                print("the machine moves left")
-                turnleft()
-                create_frame()
-            elif data == "R" : 
-                print("the machine moves right")
-                turnright()
-                create_frame()
-            elif data == "S" : 
-                print("the machine stops")
+            if data == "S" : 
+                print("the robot stops")
                 stop()
             elif data == "C" : 
-                print("recording frames turned ON/OFF")
-                create_imgs()
+                print("NN processing -- ON/OFF")
+                turn_NN_on()
+        
         return ("nothing")
 
     if __name__ == "__main__":
