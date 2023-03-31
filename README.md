@@ -24,7 +24,8 @@
 
 ![res_pics](https://github.com/AGNworks/CarCam_NN/blob/main/pictures/4.png)
 
-**At this moment I am working on making this system work faster on Raspberry Pi 4, and optimise my code. As I will make progress in it I will add the code to this repository.**
+## Set up -- Raspberry Pi
+Before using the code we need to set up the system to run the python code after boot. For this 
 
 
 
