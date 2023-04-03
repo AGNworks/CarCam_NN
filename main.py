@@ -66,8 +66,8 @@ GPIO.output(stateLED, GPIO.LOW)
 #GPIO.output(Ben, GPIO.HIGH)
 Ap = GPIO.PWM(Aen, 1000)
 Bp = GPIO.PWM(Ben, 1000)
-Ap.start(35)   #speed of the left side
-Bp.start(50)   #speed of the right side
+Ap.start(25)   #speed of the left side
+Bp.start(40)   #speed of the right side
 
 #functions to control DC motors
 def forward():
@@ -75,14 +75,14 @@ def forward():
     GPIO.output(Apin2, GPIO.HIGH)
     GPIO.output(Bpin1, GPIO.LOW)
     GPIO.output(Bpin2, GPIO.HIGH)
-    print("MF")
+    print("F")
        
 def backward():
     GPIO.output(Bpin1, GPIO.HIGH)
     GPIO.output(Bpin2, GPIO.LOW)
     GPIO.output(Apin1, GPIO.HIGH)
     GPIO.output(Apin2, GPIO.LOW)
-    print("MB")
+    print("B")
     
 def stop():
     GPIO.output(Apin1, GPIO.HIGH)
@@ -96,7 +96,7 @@ def turnleft():
     GPIO.output(Bpin2, GPIO.HIGH)
     GPIO.output(Apin1, GPIO.HIGH)
     GPIO.output(Apin2, GPIO.LOW)
-    print("ML")
+    print("L")
 
     
 def turnright():
@@ -104,7 +104,7 @@ def turnright():
     GPIO.output(Apin2, GPIO.HIGH)
     GPIO.output(Bpin1, GPIO.HIGH)
     GPIO.output(Bpin2, GPIO.LOW)
-    print("MR")
+    print("R")
 
 
 def turn_NN_on():
@@ -118,25 +118,27 @@ def turn_NN_on():
             print("can't start NN")
     elif NN_on == True:
         try:
+            stop()
             NN_on = False
             print("NN - OFF")
             GPIO.output(stateLED, GPIO.LOW)
         except:
             print("can't stop NN")
 
-check_xy = [45, 45]
+check_xy = [45, 40] #the coordinate on the picture where we are analizing our position according to the road 
+
 def control_NN(img): #function to control the robot accoding to the predicted image
     white = [255,255,255]
-    if NN_on == True:
-        if img[check_xy[0]][check_xy[1]][0] <= 5 and img[check_xy[0]][check_xy[1]][1] <= 5 and img[check_xy[0]][check_xy[1]][2] <= 5 :
-            ind_left = np.where(np.all(img[check_xy[0]][0 : check_xy[1]] == white, axis = -1))[0]
-            ind_right = np.where(np.all(img[check_xy[0]][check_xy[1] : ] == white, axis = -1))[0]
-            
-            if len(ind_left) != 0:
+    if NN_on == True: 
+        ind_left = np.where(np.all(img[check_xy[0]][0 : check_xy[1]] == white, axis = -1))[0] #quantity of white pixels on the left from the check point on the image
+        ind_right = np.where(np.all(img[check_xy[0]][check_xy[1] : ] == white, axis = -1))[0] #quantity of white pixels on the right from the check point on the image 
+        diff = abs(len(ind_left) - len(ind_right)) #to understand if we are not on the center of the road 
+        print(diff)
+        if diff >= 10: #if between quatities the difference more than 10 then we will turn the robot in the needed direction
+            if len(ind_left) > len(ind_right): 
                 turnleft()
             else:
                 turnright()
-                
         else:
             forward()
 
