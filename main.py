@@ -128,14 +128,14 @@ def turn_NN_on():
 
 check_xy = [45, 40] #the coordinate on the picture where we are analizing our position according to the road 
 
-def control_NN(img): #function to control the robot accoding to the predicted image
+def control_NN(img): #function to control the robot according to the predicted image
     white = [255,255,255]
     if NN_on == True: 
         ind_left = np.where(np.all(img[check_xy[0]][0 : check_xy[1]] == white, axis = -1))[0] #quantity of white pixels on the left from the check point on the image
         ind_right = np.where(np.all(img[check_xy[0]][check_xy[1] : ] == white, axis = -1))[0] #quantity of white pixels on the right from the check point on the image 
         diff = abs(len(ind_left) - len(ind_right)) #to understand if we are not on the center of the road 
         print(diff)
-        if diff >= 10: #if between quatities the difference more than 10 then we will turn the robot in the needed direction
+        if diff >= 10: #if between quantities of the differences more than 10, then we will turn the robot in the needed direction
             if len(ind_left) > len(ind_right): 
                 turnleft()
             else:
