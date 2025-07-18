@@ -32,7 +32,22 @@
 </p>
 
 ## Set up -- Raspberry Pi
-Before use, we need to set up the system to run the python code after boot. For this read the following [txt file](https://github.com/AGNworks/CarCam_NN/blob/main/bootraspi.txt) .
+Before use, we need to set up the system to run the python code after boot.
+Open the file for edit 
+```bash
+sudo nano /etc/profile
+```
+Add these lines in the end of the file
+```bash
+# Wait wifi to connect
+while [ "$(ifconfig wlan0 | grep inet | grep 192.168.)" = ""  ]; do sleep 1; done
+
+# Change to the project directory
+cd your_project_directory
+
+# And start the main.py
+sudo python main.py
+```
 
 
 
