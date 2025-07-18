@@ -1,13 +1,13 @@
 # Control system for remote car with computer vision
 
-**I created this little project to connect to connect the physical world with a neural network which I created to recognize the red road (because I had that color of tape) in real time in front the robot and in this way control it.**
+**I created this little project to control a robot using a simple U-net to recognize the track.**
 
 ## The actual version of my robot
 <p align="center">
   <img src="https://github.com/AGNworks/CarCam_NN/blob/main/pictures/1.png" alt="Actual version"/>
 </p>
 
-**The design idea I got from Tim Clark's model, which I found on [thingiverse](https://www.thingiverse.com/thing:700835). After the first version it became more controlable and more solid. The first version looked like this:**
+**The design idea I got from Tim Clark's model, which I found on [thingiverse](https://www.thingiverse.com/thing:700835). With this design it became more controlable and more solid. The first version looked like this:**
 
 <p align="center">
   <img src="https://github.com/AGNworks/CarCam_NN/blob/main/pictures/2.png" alt="Old version"/>
