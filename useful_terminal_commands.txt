@@ -1,1 +1,0 @@
-vcgencmd get_mem gpu #get the memory of gpu
