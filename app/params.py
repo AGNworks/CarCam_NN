@@ -5,7 +5,7 @@ Module to define all the parameters used in controlling.
 MODEL_PATH = 'assets/models/model_unet_light_new_better.h5'
 
 # Motor control parameters
-SPEED = 50  # Starting PWM % value for wheels
+SPEED = 10  # Starting PWM % value for wheels
 SLEEPTURN = 0.3
 SLEEPRUN = 0.5
 
