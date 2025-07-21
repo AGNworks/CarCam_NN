@@ -207,14 +207,18 @@ class RobotCar:
         height, width = gray_img.shape[:2]
 
         # Define region of interest (ROI) - middle horizontal strip
-        roi_height = height // 3
-        roi_top = (height - roi_height) // 2
+        roi_height = 5
+        roi_top = height // 3
         roi_bottom = roi_top + roi_height
-        roi = gray_img[roi_top:roi_bottom, :]
+        roi_width = 5
+        roi_left_side = (width - roi_width) // 2
+        roi_right_side = width + roi_width
+        roi = gray_img[roi_top:roi_bottom, roi_left_side:roi_right_side]
 
         # Find white pixels in ROI
         white_pixels = np.where(roi > white_threshold)
 
+        print(f"White pixels in focus zone: {len(white_pixels[0])}")
         if len(white_pixels[0]) == 0:
             # No track detected - stop or search
             self.stop()
