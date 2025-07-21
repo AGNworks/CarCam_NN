@@ -41,7 +41,7 @@ class RobotCar:
         self.smart_moving: bool = False  # The NN is moving it or not
 
         # Set up the pins
-        # self.set_up_robot_pins()
+        self.set_up_robot_pins()
 
     def set_up_robot_pins(self) -> None:
         """
