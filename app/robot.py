@@ -8,7 +8,7 @@ import time
 import numpy as np
 import RPi.GPIO as GPIO
 
-from app.params import MAX_SPEED, MIN_SPEED, SPEED
+from app.params import FOCUS_POINT, MAX_SPEED, MIN_SPEED, SPEED
 
 
 def shutdownrpi(channel):
@@ -34,7 +34,6 @@ class RobotCar:
     left_pwm_pin = 18   #PWM pin
     right_pwm_pin = 13   #PWM pin
     state_pin = 25
-    FOCUS_POINT = [45, 45]  # Pixel coordinates where to check the values of predicted images from camera
 
     def __init__(self):
         self.nn_on: bool = False  # The NN is working or not
@@ -174,17 +173,19 @@ class RobotCar:
         """
 
         white = [255,255,255]
-        if (img[self.FOCUS_POINT[0]][self.FOCUS_POINT[1]][0] <= 5 and
-            img[self.FOCUS_POINT[0]][self.FOCUS_POINT[1]][1] <= 5 and
-            img[self.FOCUS_POINT[0]][self.FOCUS_POINT[1]][2] <= 5) :
-            ind_left = np.where(np.all(img[self.FOCUS_POINT[0]][0 : self.FOCUS_POINT[1]] == white, axis = -1))[0]
-            ind_right = np.where(np.all(img[self.FOCUS_POINT[0]][self.FOCUS_POINT[1] : ] == white, axis = -1))[0]
+        if (img[FOCUS_POINT[0]][FOCUS_POINT[1]][0] <= 5 and
+            img[FOCUS_POINT[0]][FOCUS_POINT[1]][1] <= 5 and
+            img[FOCUS_POINT[0]][FOCUS_POINT[1]][2] <= 5) :
 
-            if len(ind_left) != 0:
+            # Check a five pixel height zone
+            white_pixels_left = len(np.where(np.all(img[FOCUS_POINT[0]:FOCUS_POINT[0]+5][0 : FOCUS_POINT[1]] == white, axis = -1))[0])
+            white_pixels_right = len(np.where(np.all(img[FOCUS_POINT[0]:FOCUS_POINT[0]+5][FOCUS_POINT[1] : ] == white, axis = -1))[0])
+
+            print(f"White pixels on the left: {white_pixels_left}, on the right: {white_pixels_right}")
+            if white_pixels_left > white_pixels_right:
                 self.turn_left()
             else:
                 self.turn_right()
-
         else:
             self.forward()
 

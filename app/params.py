@@ -14,3 +14,6 @@ MIN_SPEED = 12
 MAX_SPEED = 20
 
 IMG_SIZE = (60,80)
+
+# Pixel coordinates where to check the values of predicted images from camera
+FOCUS_POINT = [20, 40]
