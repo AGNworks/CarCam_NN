@@ -2,6 +2,8 @@
 Module to work with frames from webcam.
 """
 
+import time
+
 import numpy as np
 from tensorflow.keras.models import Model , load_model
 from tensorflow.keras.preprocessing import image
@@ -51,10 +53,14 @@ class SegmentationModel:
         # x = image.img_to_array(img)
         # x = np.array(img)
 
+        start = time.time()
+
         x = np.expand_dims(img, axis=0)
 
         # Get results as array
         predict = np.argmax(self.model.predict(x, verbose = 0), axis=-1)
+
+        print(time.time()-start)
 
         # Return the result as array of rgb images
         return self.labels_to_rgb(predict[..., None])
