@@ -2,8 +2,6 @@
 Module to work with frames from webcam.
 """
 
-import os
-
 import numpy as np
 from tensorflow.keras.models import Model , load_model
 from tensorflow.keras.preprocessing import image

@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
 
     <title>CarCam</title>
 
-     <!--<link rel="stylesheet" href="styles.css">-->
+    <!--<link rel="stylesheet" href="styles.css">-->
 
 </head>
 
@@ -14,10 +15,12 @@
         <div id="pictures">
             <table>
                 <td>
-                    <img src="/video_feed" style="float:left; width:100%; max-width: 700px; max-height:600px; border-radius:10px"></img>
+                    <img src="/video_feed"
+                        style="float:left; width:100%; max-width: 400px; max-height:300px; border-radius:10px"></img>
                 </td>
                 <td>
-                    <img src="/seg_feed" style="float:left; width:100%; max-width: 700px; max-height:600px; border-radius:10px"></img>
+                    <img src="/seg_feed"
+                        style="float:left; width:400%; max-width: 400px; max-height:300px; border-radius:10px"></img>
                 </td>
 
             </table>
@@ -27,11 +30,13 @@
                 <td>
                     <table>
                         <tr>
-                          <td><button onclick="cmd_ajax(this)">S</button></td>
-                          <td> </td>
-                          <td><button onclick="cmd_ajax(this)">C</button></td>
+                            <td><button onclick="cmd_ajax('R')">Run</button></td>
+                            <td> </td>
+                            <td><button onclick="cmd_ajax('S')">Stop</button></td>
+                            <td> </td>
+                            <td><button onclick="cmd_ajax('C')">Switch NN mode</button></td>
                         </tr>
-                      </table>
+                    </table>
                 </td>
             </table>
         </div>
@@ -39,12 +44,11 @@
 </body>
 
 <script type=text/javascript>
-    function cmd_ajax(id){
-        x = id.innerHTML;
+    function cmd_ajax(msg){
         $.ajax({
             type: "POST",
             url: "/process",
-            data: JSON.stringify(x),
+            data: JSON.stringify(msg),
             contentType: "application/json",
             dataType: 'json'
         });

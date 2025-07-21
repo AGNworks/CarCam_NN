@@ -7,12 +7,13 @@ from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, StreamingResponse
 
 from app.camera import camera
-# from app.robot import robot
+from app.robot import robot
 
 
 # Setup templates
 templates = Jinja2Templates(directory="templates")
 
+# Router for NN processes
 main_router = APIRouter()
 
 
@@ -56,11 +57,17 @@ async def get_command_from_user(request: Request):
 
     data = await request.json()
 
+    if data == "R":
+        print("The robot starts move if NN is started")
+        robot.smart_moving = True
+
     if data == "S":
-        print("the robot stops")
-        # robot.stop()
+        print("The robot stops")
+        robot.smart_moving = False
+        robot.stop()
 
     elif data == "C":
-        print("NN processing -- ON/OFF")
+        robot.switch_nn()
+        print(f"NN processing -- {robot.nn_on}")
 
     return {"status": "success"}

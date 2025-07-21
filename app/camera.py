@@ -8,6 +8,7 @@ import numpy as np
 
 from app.params import IMG_SIZE
 from app.segmentation import segmentation_model
+from app.robot import robot
 
 
 class Camera:
@@ -48,22 +49,31 @@ class Camera:
         """
 
         while True:
-            success, frame = self.camera_object.read()  # read the camera frame
-            simg = np.empty(shape = (IMG_SIZE[0],IMG_SIZE[1],3))
-            if not success:
-                break
-            else:
-                simg = cv2.resize(frame, (IMG_SIZE[1],IMG_SIZE[0])) #the resized capture image from webcam
-                imgseg = cv2.cvtColor(simg, cv2.COLOR_BGR2RGB) #change channel order pefore giving it to NN
-                predict_segments = segmentation_model.segment_frame(imgseg) #get prediction from model
-                predicted = predict_segments[0]
-                # control_NN(predicted) #controling function
+            if robot.nn_on:
+                success, frame = self.camera_object.read()  # read the camera frame
+                if not success:
+                    break
+                else:
+                    simg = cv2.resize(frame, (IMG_SIZE[1],IMG_SIZE[0])) #the resized capture image from webcam
+                    imgseg = cv2.cvtColor(simg, cv2.COLOR_BGR2RGB) #change channel order pefore giving it to NN
+                    predict_segments = segmentation_model.segment_frame(imgseg) #get prediction from model
+                    predicted = predict_segments[0]
+                    if robot.smart_moving:
+                        # Move the robot
+                        robot.smart_robot_control(predicted)
 
-                overlayed = cv2.addWeighted(simg, 1, predicted, 1,0) #combine the original and the predicted image
-                ret, buffer = cv2.imencode('.jpg', overlayed)
+                    overlayed = cv2.addWeighted(simg, 1, predicted, 1,0) #combine the original and the predicted image
+                    ret, buffer = cv2.imencode('.jpg', overlayed)
+                    frame = buffer.tobytes()
+                    yield (b'--frame\r\n'
+                        b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
+            else:
+                simg = np.empty(shape = (IMG_SIZE[0],IMG_SIZE[1], 3))
+                # Stream empty
+                ret, buffer = cv2.imencode('.jpg', simg)
                 frame = buffer.tobytes()
                 yield (b'--frame\r\n'
-                       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
+                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
 
 
 camera = Camera()
