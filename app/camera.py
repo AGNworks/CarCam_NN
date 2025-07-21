@@ -43,7 +43,7 @@ class Camera:
                 b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
             await asyncio.sleep(0.03)  # Control frame rate
 
-    def gen_nn_frames(self):
+    async def gen_nn_frames(self):
         """
         Generates the video content from frames of nn-model.
         """
@@ -62,8 +62,6 @@ class Camera:
                         # Move the robot
                         robot.smart_robot_control(predicted)
 
-                    print("Shape of simg:", simg.shape)
-                    print("Shape of predicted:", predicted.shape)
                     overlayed = cv2.addWeighted(simg, 1, predicted, 1,0) #combine the original and the predicted image
                     ret, buffer = cv2.imencode('.jpg', overlayed)
                     frame = buffer.tobytes()
@@ -76,6 +74,7 @@ class Camera:
                 frame = buffer.tobytes()
                 yield (b'--frame\r\n'
                     b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
+            await asyncio.sleep(0.1)  # Control frame rate
 
 
 camera = Camera()

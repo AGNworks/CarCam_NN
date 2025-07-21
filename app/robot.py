@@ -253,11 +253,11 @@ class RobotCar:
         if not self.nn_on:
             self.nn_on = True
             print("NN - ON")
-            GPIO.output(self.state_pin, GPIO.HIGH)
+            # GPIO.output(self.state_pin, GPIO.HIGH)
         else:
             self.nn_on = False
             print("NN - OFF")
-            GPIO.output(self.state_pin, GPIO.LOW)
+            # GPIO.output(self.state_pin, GPIO.LOW)
 
     def cleanup(self):
         """
