@@ -59,6 +59,7 @@ async def get_command_from_user(request: Request):
 
     if data == "R":
         print("The robot starts move if NN is started")
+        robot.forward()
         robot.smart_moving = True
 
     if data == "S":

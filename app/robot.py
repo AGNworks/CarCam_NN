@@ -239,8 +239,10 @@ class RobotCar:
         right_speed = base_speed + Kp * error
 
         # Ensure speeds are within bounds
-        left_speed = np.clip(left_speed, -100, 100)
-        right_speed = np.clip(right_speed, -100, 100)
+        left_speed = np.clip(left_speed, MIN_SPEED, MAX_SPEED)
+        right_speed = np.clip(right_speed, MIN_SPEED, MAX_SPEED)
+
+        print(f"left speed: {left_speed}, right speed: {right_speed}")
 
         # Set motor speeds
         self.set_motor_speeds(left_speed, right_speed)
