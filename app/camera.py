@@ -62,6 +62,8 @@ class Camera:
                         # Move the robot
                         robot.smart_robot_control(predicted)
 
+                    print("Shape of simg:", simg.shape)
+                    print("Shape of predicted:", predicted.shape)
                     overlayed = cv2.addWeighted(simg, 1, predicted, 1,0) #combine the original and the predicted image
                     ret, buffer = cv2.imencode('.jpg', overlayed)
                     frame = buffer.tobytes()
