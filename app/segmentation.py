@@ -8,7 +8,7 @@ import numpy as np
 from tensorflow.keras.models import Model , load_model
 from tensorflow.keras.preprocessing import image
 
-from app.params import MODEL_PATH
+from app.params import IMG_SIZE, MODEL_PATH
 
 
 class SegmentationModel:
@@ -16,54 +16,58 @@ class SegmentationModel:
     Model to get segmanted frame for controling the robot.
     """
 
-    way = (255,255,255)
-    backg = (0,0,0)
-    class_labels = (way, backg)
-    height = 60
-    width = 80
+    track_color = (255,255,255)
+    backg_color = (0,0,0)
+    class_labels = (track_color, backg_color)
+    height = IMG_SIZE[0]
+    width = IMG_SIZE[1]
 
     def __init__(self):
         # Load pretrained model
         self.model = load_model(MODEL_PATH, compile = False)
         print("Ready to make segmanted pictures")
 
-    def labels_to_rgb(self, image_list):
+    def labels_to_rgb(self, image_list=None) -> np.ndarray:
         """
         Postprocess the result of the U-net model to work with.
         """
 
-        result = []
+        if image_list:
+            result = []
 
-        for y in image_list:
-            temp = np.zeros((self.height, self.width, 3), dtype='uint8')
+            for y in image_list:
+                temp = np.zeros((self.height, self.width, 3), dtype='uint8')
 
-            for i, cl in enumerate(self.class_labels):
-                temp[np.where(np.all(y==i, axis=-1))] = self.class_labels[i]
+                for i, cl in enumerate(self.class_labels):
+                    temp[np.where(np.all(y==i, axis=-1))] = self.class_labels[i]
 
-            result.append(temp)
+                result.append(temp)
 
-        return np.array(result)
+            return np.array(result)
+        else:
+            return np.empty(shape = (IMG_SIZE[0],IMG_SIZE[1], 3))
 
 
-    def segment_frame(self, img):
+    def segment_frame(self, img) -> np.ndarray:
         """
         Get result from U-net model.
         """
 
-        # x = image.img_to_array(img)
-        # x = np.array(img)
-
         start = time.time()
+        try:
+            x = np.expand_dims(img, axis=0)
 
-        x = np.expand_dims(img, axis=0)
+            # Get results as array
+            predict = np.argmax(self.model.predict(x, verbose = 0), axis=-1)
 
-        # Get results as array
-        predict = np.argmax(self.model.predict(x, verbose = 0), axis=-1)
+            print(time.time()-start)
 
-        print(time.time()-start)
+            result = self.labels_to_rgb(predict[..., None])
+        except:
+            result = self.labels_to_rgb()
 
         # Return the result as array of rgb images
-        return self.labels_to_rgb(predict[..., None])
+        return result
 
 
 segmentation_model = SegmentationModel()
