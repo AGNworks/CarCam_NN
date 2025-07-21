@@ -45,7 +45,7 @@ class SegmentationModel:
 
             return np.array(result)
         else:
-            return np.empty(shape = (IMG_SIZE[0],IMG_SIZE[1], 3))
+            return np.zeros((self.height, self.width, 3), dtype='uint8')
 
 
     def segment_frame(self, img) -> np.ndarray:

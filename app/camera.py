@@ -70,7 +70,7 @@ class Camera:
                     yield (b'--frame\r\n'
                         b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
             else:
-                simg = np.empty(shape = (IMG_SIZE[0],IMG_SIZE[1], 3))
+                simg = np.zeros((IMG_SIZE[0], IMG_SIZE[1], 3), dtype='uint8')
                 # Stream empty
                 ret, buffer = cv2.imencode('.jpg', simg)
                 frame = buffer.tobytes()
