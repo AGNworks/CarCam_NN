@@ -167,7 +167,7 @@ class RobotCar:
 
         return True
 
-    def control_by_nn(self, img):
+    def control_by_nn(self, img: np.ndarray):
         """
         Method to control the robot according to the predicted image.
         """
@@ -178,8 +178,11 @@ class RobotCar:
             img[FOCUS_POINT[0]][FOCUS_POINT[1]][2] <= 5) :
 
             # Check a five pixel height zone
-            white_pixels_left = len(np.where(np.all(img[FOCUS_POINT[0]:FOCUS_POINT[0]+5][0 : FOCUS_POINT[1]] == white, axis = -1))[0])
-            white_pixels_right = len(np.where(np.all(img[FOCUS_POINT[0]:FOCUS_POINT[0]+5][FOCUS_POINT[1] : ] == white, axis = -1))[0])
+            zone_left = img[FOCUS_POINT[0]:FOCUS_POINT[0]+5, 0:FOCUS_POINT[1]]
+            white_pixels_left = np.sum(np.all(zone_left == white, axis=-1))
+
+            zone_right = img[FOCUS_POINT[0]:FOCUS_POINT[0]+5, FOCUS_POINT[1]:]
+            white_pixels_right = np.sum(np.all(zone_right == white, axis=-1))
 
             print(f"White pixels on the left: {white_pixels_left}, on the right: {white_pixels_right}")
             if white_pixels_left > white_pixels_right:
