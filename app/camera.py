@@ -60,7 +60,7 @@ class Camera:
                     predicted = predict_segments[0]
                     if robot.smart_moving:
                         # Move the robot
-                        robot.smart_robot_control(predicted)
+                        robot.control_by_nn(predicted)
 
                     overlayed = cv2.addWeighted(simg, 1, predicted, 1,0) #combine the original and the predicted image
                     ret, buffer = cv2.imencode('.jpg', overlayed)
