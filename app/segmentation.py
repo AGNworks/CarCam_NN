@@ -32,7 +32,7 @@ class SegmentationModel:
         Postprocess the result of the U-net model to work with.
         """
 
-        if image_list:
+        if image_list is not None:
             result = []
 
             for y in image_list:
