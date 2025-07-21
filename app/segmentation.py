@@ -54,17 +54,14 @@ class SegmentationModel:
         """
 
         start = time.time()
-        try:
-            x = np.expand_dims(img, axis=0)
+        x = np.expand_dims(img, axis=0)
 
-            # Get results as array
-            predict = np.argmax(self.model.predict(x, verbose = 0), axis=-1)
+        # Get results as array
+        predict = np.argmax(self.model.predict(x, verbose = 0), axis=-1)
 
-            print(time.time()-start)
+        print(time.time()-start)
 
-            result = self.labels_to_rgb(predict[..., None])
-        except:
-            result = self.labels_to_rgb()
+        result = self.labels_to_rgb(image_list=predict[..., None])
 
         # Return the result as array of rgb images
         return result
