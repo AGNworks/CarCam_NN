@@ -17,3 +17,8 @@ IMG_SIZE = (60,80)
 
 # Pixel coordinates where to check the values of predicted images from camera
 FOCUS_POINT = [40, 40]
+CHECK_ZONE_HEIGHT = 5
+ZONE_THRESHOLD = 10  # If the difference of the white px qty is less then this threshold then it is the same
+SPEED_STEP = 2
+ZONE_K = 3
+MAX_NULL_ZONES = 10

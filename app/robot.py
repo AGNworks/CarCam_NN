@@ -8,7 +8,8 @@ import time
 import numpy as np
 import RPi.GPIO as GPIO
 
-from app.params import FOCUS_POINT, MAX_SPEED, MIN_SPEED, SPEED
+from app.params import (CHECK_ZONE_HEIGHT, FOCUS_POINT,
+        MAX_NULL_ZONES, MAX_SPEED, MIN_SPEED, SPEED, SPEED_STEP, ZONE_THRESHOLD)
 
 
 def shutdownrpi(channel):
@@ -38,6 +39,11 @@ class RobotCar:
     def __init__(self):
         self.nn_on: bool = False  # The NN is working or not
         self.smart_moving: bool = False  # The NN is moving it or not
+
+        self.left_speed: int = MAX_SPEED
+        self.right_speed: int = MAX_SPEED
+
+        self.null_zone_counter: int = 0
 
         # Set up the pins
         self.set_up_robot_pins()
@@ -122,50 +128,49 @@ class RobotCar:
         GPIO.output(self.right_pin1, GPIO.HIGH)
         GPIO.output(self.right_pin2, GPIO.LOW)
 
-    def set_motor_speeds(self, left_speed: float, right_speed: float) -> bool:
+    def set_motor_speeds(self, test_mode: bool = False) -> bool:
         """
         Set the motor speeds.
         """
 
-        if left_speed == 0 and right_speed == 0:
-            self.stop()
-            return False
+        print(f"Left speed: {self.left_speed}, right speed: {self.right_speed}")
 
-        # Get the speed to set
-        if abs(left_speed) > MAX_SPEED:
-            v_left = MAX_SPEED
-        elif abs(left_speed) < MIN_SPEED:
-            v_left = MIN_SPEED
-        else:
-            v_left = abs(left_speed)
+        if not test_mode:
+            # Get the speed to set
+            if abs(self.left_speed) > MAX_SPEED:
+                v_left = MAX_SPEED
+            elif abs(self.left_speed) < MIN_SPEED:
+                v_left = MIN_SPEED
+            else:
+                v_left = abs(self.left_speed)
 
-        if abs(right_speed) > MAX_SPEED:
-            r_left = MAX_SPEED
-        elif abs(right_speed) < MIN_SPEED:
-            r_left = MIN_SPEED
-        else:
-            r_left = abs(right_speed)
+            if abs(self.right_speed) > MAX_SPEED:
+                r_left = MAX_SPEED
+            elif abs(self.right_speed) < MIN_SPEED:
+                r_left = MIN_SPEED
+            else:
+                r_left = abs(self.right_speed)
 
-        # Set the speed
-        self.left_pwm.ChangeDutyCycle(v_left)
-        self.right_pwm.ChangeDutyCycle(r_left)
+            # Set the speed
+            self.left_pwm.ChangeDutyCycle(v_left)
+            self.right_pwm.ChangeDutyCycle(r_left)
 
-        # Set the direction
-        if left_speed < 0:
-            GPIO.output(self.left_pin1, GPIO.HIGH)
-            GPIO.output(self.left_pin2, GPIO.LOW)   # Left side backward
-        else:
-            GPIO.output(self.left_pin1, GPIO.LOW)
-            GPIO.output(self.left_pin2, GPIO.HIGH)  # Left side forward
+            # Set the direction
+            if self.left_speed < 0:
+                GPIO.output(self.left_pin1, GPIO.HIGH)
+                GPIO.output(self.left_pin2, GPIO.LOW)   # Left side backward
+            else:
+                GPIO.output(self.left_pin1, GPIO.LOW)
+                GPIO.output(self.left_pin2, GPIO.HIGH)  # Left side forward
 
-        if right_speed < 0:
-            GPIO.output(self.right_pin1, GPIO.HIGH)
-            GPIO.output(self.right_pin2, GPIO.LOW)   # Right side backward
-        else:
-            GPIO.output(self.right_pin1, GPIO.LOW)
-            GPIO.output(self.right_pin2, GPIO.HIGH)  # Right side forward
+            if self.right_speed < 0:
+                GPIO.output(self.right_pin1, GPIO.HIGH)
+                GPIO.output(self.right_pin2, GPIO.LOW)   # Right side backward
+            else:
+                GPIO.output(self.right_pin1, GPIO.LOW)
+                GPIO.output(self.right_pin2, GPIO.HIGH)  # Right side forward
 
-        return True
+            return True
 
     def control_by_nn(self, img: np.ndarray):
         """
@@ -192,68 +197,47 @@ class RobotCar:
         else:
             self.forward()
 
-    def smart_robot_control(self, img):
+    def smart_robot_control(self, img: np.ndarray) -> np.ndarray:
         """
         Improved method to control the robot according to the predicted image.
         Uses proportional control based on the track's center position relative to the image center.
         """
 
-        # Convert image to grayscale if it isn't already
-        if len(img.shape) == 3 and img.shape[2] == 3:
-            gray_img = np.mean(img, axis=2)
-        else:
-            gray_img = img
+        # Create a copy of the original image to modify
+        merged_img = img.copy()
 
-        # Define white threshold (adjust as needed)
-        white_threshold = 200
+        white = [255,255,255]
 
-        # Get image dimensions
-        height, width = gray_img.shape[:2]
+        # Check a five pixel height zone
+        zone_left = img[FOCUS_POINT[0]:FOCUS_POINT[0]+CHECK_ZONE_HEIGHT, 0:FOCUS_POINT[1]]
+        white_pixels_left = np.sum(np.all(zone_left == white, axis=-1))
 
-        # Define region of interest (ROI) - middle horizontal strip
-        roi_height = 5
-        roi_top = height // 3
-        roi_bottom = roi_top + roi_height
-        roi_width = 5
-        roi_left_side = (width - roi_width) // 2
-        roi_right_side = width + roi_width
-        roi = gray_img[roi_top:roi_bottom, roi_left_side:roi_right_side]
+        zone_right = img[FOCUS_POINT[0]:FOCUS_POINT[0]+CHECK_ZONE_HEIGHT, FOCUS_POINT[1]:]
+        white_pixels_right = np.sum(np.all(zone_right == white, axis=-1))
 
-        # Find white pixels in ROI
-        white_pixels = np.where(roi > white_threshold)
+        print(f"White pixels on the left: {white_pixels_left}, on the right: {white_pixels_right}")
 
-        print(f"White pixels in focus zone: {len(white_pixels[0])}")
-        if len(white_pixels[0]) == 0:
-            # No track detected - stop or search
-            self.stop()
-            return
+        # Color the zones on the merged image
+        # Left zone (green with 50% opacity)
+        merged_img[FOCUS_POINT[0]:FOCUS_POINT[0]+CHECK_ZONE_HEIGHT, 0:FOCUS_POINT[1]] = (
+            merged_img[FOCUS_POINT[0]:FOCUS_POINT[0]+CHECK_ZONE_HEIGHT, 0:FOCUS_POINT[1]] * 0.5 +
+            np.array([0, 255, 0]) * 0.5
+        )
 
-        # Calculate track center in ROI
-        track_center_x = np.mean(white_pixels[1])
+        # Right zone (blue with 50% opacity)
+        merged_img[FOCUS_POINT[0]:FOCUS_POINT[0]+CHECK_ZONE_HEIGHT, FOCUS_POINT[1]:] = (
+            merged_img[FOCUS_POINT[0]:FOCUS_POINT[0]+CHECK_ZONE_HEIGHT, FOCUS_POINT[1]:] * 0.5 +
+            np.array([255, 0, 0]) * 0.5
+            )
 
-        # Convert to image coordinates
-        track_center_x_img = track_center_x
-        image_center_x = width // 2
+        # Control the movement
+        self.correct_direction(
+            zone_left=white_pixels_left,
+            zone_right=white_pixels_right,
+            test_mode=False
+        )
 
-        # Calculate error (difference between track center and image center)
-        error = track_center_x_img - image_center_x
-
-        # Proportional control parameters
-        Kp = 0.01  # Proportional gain (adjust as needed)
-        base_speed = 50  # Base speed (0-100)
-
-        # Calculate motor speeds
-        left_speed = base_speed - Kp * error
-        right_speed = base_speed + Kp * error
-
-        # Ensure speeds are within bounds
-        left_speed = np.clip(left_speed, MIN_SPEED, MAX_SPEED)
-        right_speed = np.clip(right_speed, MIN_SPEED, MAX_SPEED)
-
-        print(f"left speed: {left_speed}, right speed: {right_speed}")
-
-        # Set motor speeds
-        self.set_motor_speeds(left_speed, right_speed)
+        return merged_img
 
     def switch_nn(self):
         """
@@ -276,5 +260,42 @@ class RobotCar:
 
         self.stop()
         GPIO.cleanup()
+
+    def correct_direction(self, zone_left: int, zone_right: int, test_mode: bool = False):
+        """
+        Analyze the difference between qty of white pixels, and decide how to move.
+        """
+
+        if abs(zone_left-zone_right) <= ZONE_THRESHOLD:
+            self.right_speed = MAX_SPEED
+            self.left_speed = MAX_SPEED
+            self.set_motor_speeds(test_mode=test_mode)
+
+        if zone_left-ZONE_THRESHOLD > zone_right:
+            self.left_speed -= SPEED_STEP
+            self.set_motor_speeds(test_mode=test_mode)
+
+        if zone_right-ZONE_THRESHOLD > zone_left:
+            self.right_speed -= SPEED_STEP
+            self.set_motor_speeds(test_mode=test_mode)
+
+        if zone_right == 0 and zone_left != 0:
+            self.right_speed = MAX_SPEED
+            self.left_speed = MAX_SPEED
+            if not test_mode:
+                self.turn_left()
+
+        if zone_left == 0 and zone_right != 0:
+            self.right_speed = MAX_SPEED
+            self.left_speed = MAX_SPEED
+            if not test_mode:
+                self.turn_right()
+
+        if zone_left == 0 and zone_right == 0:
+            self.null_zone_counter += 1
+            if self.null_zone_counter == MAX_NULL_ZONES:
+                if not test_mode:
+                    self.stop()
+                self.null_zone_counter = 0
 
 robot = RobotCar()
