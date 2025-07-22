@@ -4,13 +4,13 @@ I created this little project to control a robot using a simple U-net to recogni
 
 ## The actual version of my robot
 <p align="center">
-  <img src="https://github.com/AGNworks/CarCam_NN/blob/main/assets/pictures/1.png" alt="Actual version"/>
+  <img src="https://github.com/AGNworks/CarCam_NN/blob/main/assets/pictures/1.png" alt="actual version"/>
 </p>
 
 The design idea I got from Tim Clark's model, which I found on [thingiverse](https://www.thingiverse.com/thing:700835). With this design it became more controlable and more solid. The first version looked like this:
 
 <p align="center">
-  <img src="https://github.com/AGNworks/CarCam_NN/blob/main/assets/pictures/2.png" alt="Old version"/>
+  <img src="https://github.com/AGNworks/CarCam_NN/blob/main/assets/pictures/2.png" alt="old version"/>
 </p>
 
 ## Dataset collecting
@@ -28,7 +28,7 @@ I generated the train segmented pictures (for the teaching process of the neural
 I started with a simple linear model Conv2D layers and Normalization, but this model didn't give me good results with pictures, what it never seen, so I moved on and experimented with U-Net models. Now I have simple U-Net model with 3 downsampling Block - Bottleneck - 3 upsampling Block. Here you can see how it works:
 
 <p align="center">
-  <img src="https://github.com/AGNworks/CarCam_NN/blob/main/assets/pictures/4.png" alt="Result"/>
+  <img src="https://github.com/AGNworks/CarCam_NN/blob/main/assets/pictures/4.png" alt="result"/>
 </p>
 
 ## Set up -- Raspberry Pi
@@ -54,5 +54,8 @@ Useful commands for testing
 vcgencmd get_mem gpu  # Get the memory of gpu
 ```
 
-
+## Test drive
+<p align="center">
+  <img src="https://github.com/AGNworks/CarCam_NN/blob/main/assets/pictures/CarCam.gif" alt="test"/>
+</p>
 
