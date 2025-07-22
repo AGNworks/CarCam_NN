@@ -1,7 +1,7 @@
 # Smart Autonomous Car Control with Computer Vision
 
 <p align="center" width="400px" height="240px">
-  <img src="https://github.com/AGNworks/CarCam_NN/blob/main/assets/pictures/4.png" alt="result"/>
+  <img src="https://github.com/AGNworks/CarCam_NN/blob/main/assets/pictures/car_moving.gif" alt="result"/>
 </p>
 
 ## Project Overview
