@@ -31,7 +31,7 @@ The current design, inspired by Tim Clark's model from [Thingiverse](https://www
 
 ### 2. Dataset Preparation:
   - Manual segmentation using GIMP
-  - Automated post-processing to ensure clean masks ([code](https://github.com/AGNworks/Image-segmentation-with-GIMP/blob/main/y_generator.py))
+  - Automated post-processing to ensure clean masks ([code](https://github.com/AGNworks/Image-segmentation))
   - Validation scripts to check data quality
 
 <p align="center">
